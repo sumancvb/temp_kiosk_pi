@@ -36,3 +36,4 @@ point-rpi
 @bash /home/pi/kiosk.sh
 
 EOF
+sudo reboot
