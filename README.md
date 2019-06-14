@@ -1,4 +1,4 @@
-# temp_kiosk_pi
+# A Pi script
 A simple raspberry pi script
 
 ## Using script
