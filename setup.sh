@@ -3,16 +3,35 @@
 echo "****************************************************"
 echo "Updating the package database"
 echo "****************************************************"
-
+sudo apt-get clean
+sudo apt-get autoremove -y
 sudo apt-get -q update
+sudo apt-get -yq install xdotool unclutter sed
 
-sudo apt-get -yq install curl chromium-browser unclutter lxde
+cat > /home/pi/kiosk.sh <<'EOF'
+#!/bin/bash
+xset s noblank
+xset s off
+xset -dpms
 
-cat > /home/pi/.config/lxsession/LXDE/autostart <<'EOF'
-@xset s off
-@xset -dpms
-@xset s noblank
-@sed -i 's/"exited_cleanly": false/"exited_cleanly": true/' ~/.config/chromium-$
-@chromium-browser --noerrdialogs --kiosk https://fast.com --disable-translate
+unclutter -idle 0.5 -root &
+
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /home/pi/.config/chromium/Default/Preferences
+sed -i 's/"exit_type":"Crashed"/"exit_type":"Normal"/' /home/pi/.config/chromium/Default/Preferences
+
+/usr/bin/chromium-browser --noerrdialogs --disable-infobars --kiosk https://fast.com https://google.com &
+
+while true; do
+   xdotool keydown ctrl+r; xdotool keyup ctrl+r;
+   sleep 10
+done
+sudo chmod +x /home/pi/kiosk.sh
+EOF
+cat > /etc/xdg/lxsession/LXDE-pi/autostart <<'EOF'
+@lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+#@xscreensaver -no-splash
+point-rpi
+@bash /home/pi/kiosk.sh
 
 EOF
